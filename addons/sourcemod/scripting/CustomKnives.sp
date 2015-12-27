@@ -12,17 +12,21 @@ new Handle:g_hMySelection;
 new Handle:g_hMyFirstJoin;
 int showMenu[MAXPLAYERS+1] = 1;
 
+#define DATA "2.0"
+
 public Plugin:myinfo =
 {
 	name = "Custom Knife Models",
 	author = "Mr.Derp & Franc1sco franug",
 	description = "Custom Knife Models",
-	version = "2.0",
+	version = DATA,
 	url = "http://steamcommunity.com/id/iLoveAnime69"
 }
 
 public OnPluginStart()
 {
+	CreateConVar("sm_customknifemodels_version", DATA, "plugin info", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	
 	HookEvent("player_spawn", Event_Spawn, EventHookMode_Post);
 	RegConsoleCmd("sm_customknife", Cmd_sm_customknife, "Knife Menu");
 	RegConsoleCmd("sm_ck", Cmd_sm_customknife, "Knife Menu");
