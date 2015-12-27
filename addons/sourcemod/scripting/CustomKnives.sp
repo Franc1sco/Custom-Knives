@@ -6,15 +6,17 @@
 #include <cstrike>
 #include <fpvm_interface>
 
+#pragma newdecls required // let's go new syntax! 
+
 int iTridaggerModel,iTridaggerSteelModel,iBlackDagger,iKabar,iOldKnife,iUltimateKnife;
 int KnifeSelection[MAXPLAYERS+1];
-new Handle:g_hMySelection;
-new Handle:g_hMyFirstJoin;
+Handle g_hMySelection;
+Handle g_hMyFirstJoin;
 int showMenu[MAXPLAYERS+1] = 1;
 
 #define DATA "2.0"
 
-public Plugin:myinfo =
+public Plugin myinfo =
 {
 	name = "Custom Knife Models",
 	author = "Mr.Derp & Franc1sco franug",
@@ -23,7 +25,7 @@ public Plugin:myinfo =
 	url = "http://steamcommunity.com/id/iLoveAnime69"
 }
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	CreateConVar("sm_customknifemodels_version", DATA, "plugin info", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
@@ -33,7 +35,7 @@ public OnPluginStart()
 	g_hMySelection = RegClientCookie("ck_selection", "Knife Selection", CookieAccess_Protected);
 	g_hMyFirstJoin = RegClientCookie("ck_firstjoin", "Knife Menu Show", CookieAccess_Protected);
 	
-	for (new i = MaxClients; i > 0; --i)
+	for (int i = MaxClients; i > 0; --i)
     {
         if (!AreClientCookiesCached(i))
         {
@@ -44,7 +46,7 @@ public OnPluginStart()
     }
 }
 
-public OnMapStart()
+public void OnMapStart()
 {
 	iTridaggerModel = PrecacheModel("models/weapons/v_knife_tridagger_v2.mdl");
 	iTridaggerSteelModel = PrecacheModel("models/weapons/v_knife_tridagger_steel.mdl");
@@ -116,7 +118,7 @@ public OnMapStart()
 	AddFileToDownloadsTable("models/weapons/v_knife_ultimate.vvd");
 }
 
-public Action:Cmd_sm_customknife(client, args)
+public Action Cmd_sm_customknife(int client, int args)
 {
 	if (client == 0)
 	{
@@ -127,23 +129,23 @@ public Action:Cmd_sm_customknife(client, args)
 	return Plugin_Handled;
 }
 
-ShowKnifeMenu(client)
+void ShowKnifeMenu(int client)
 {
-	new Handle:menu = CreateMenu(mh_KnifeHandler, MENU_ACTIONS_DEFAULT);
-	SetMenuTitle(menu, "Select Knife");
+	Menu menu_knives = new Menu(mh_KnifeHandler, MENU_ACTIONS_DEFAULT);
+	SetMenuTitle(menu_knives, "Select Knife");
 
-	AddMenuItem(menu, "default", "Default Knife");
-	AddMenuItem(menu, "tridagger", "Tri-Dagger Black");
-	AddMenuItem(menu, "tridagger_steel", "Tri-Dagger Steel");
-	AddMenuItem(menu, "kabar", "Ka-Bar");
-	AddMenuItem(menu, "reaper", "Reaper Dagger");
-	AddMenuItem(menu, "css", "1.6/CSS Knife");
-	AddMenuItem(menu, "ultimate", "Bear Grylls Knife");
+	AddMenuItem(menu_knives, "default", "Default Knife");
+	AddMenuItem(menu_knives, "tridagger", "Tri-Dagger Black");
+	AddMenuItem(menu_knives, "tridagger_steel", "Tri-Dagger Steel");
+	AddMenuItem(menu_knives, "kabar", "Ka-Bar");
+	AddMenuItem(menu_knives, "reaper", "Reaper Dagger");
+	AddMenuItem(menu_knives, "css", "1.6/CSS Knife");
+	AddMenuItem(menu_knives, "ultimate", "Bear Grylls Knife");
 
-	DisplayMenu(menu, client, 15);
+	DisplayMenu(menu_knives, client, 0);
 }
 
-public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
+public int mh_KnifeHandler(Menu menu, MenuAction action, int param1, int param2)
 {
 	switch (action)
 	{
@@ -151,102 +153,12 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 		{
 			//param1 is client, param2 is item
 
-			new String:item[64];
+			char item[64];
 			GetMenuItem(menu, param2, item, sizeof(item));
-
-			if (StrEqual(item, "default"))
-			{
-				if (IsPlayerAlive(param1) && HasKnife(param1))
-				{
-					remove_knife(param1);
-					FPVMI_RemoveViewModelToClient(param1, "weapon_knife");
-					GivePlayerItem(param1, "weapon_knife");
-				}
-				KnifeSelection[param1] = 0;
-				new String:item2[16];
-				IntToString(KnifeSelection[param1], item2, sizeof(item2));
-				SetClientCookie(param1, g_hMySelection, item2);
-			}
-			else if (StrEqual(item, "tridagger"))
-			{
-				KnifeSelection[param1] = 1;
-				if (IsPlayerAlive(param1) && HasKnife(param1))
-				{
-					remove_knife(param1);
-					FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerModel);
-					GivePlayerItem(param1, "weapon_knife");
-				}
-				new String:item2[16];
-				IntToString(KnifeSelection[param1], item2, sizeof(item2));
-				SetClientCookie(param1, g_hMySelection, item2);
-			}
-			else if (StrEqual(item, "tridagger_steel"))
-			{
-				KnifeSelection[param1] = 2;
-				if (IsPlayerAlive(param1) && HasKnife(param1))
-				{
-					remove_knife(param1);
-					FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerSteelModel);
-					GivePlayerItem(param1, "weapon_knife");
-				}
-				new String:item2[16];
-				IntToString(KnifeSelection[param1], item2, sizeof(item2));
-				SetClientCookie(param1, g_hMySelection, item2);
-			}
-			else if (StrEqual(item, "kabar"))
-			{
-				KnifeSelection[param1] = 3;
-				if (IsPlayerAlive(param1) && HasKnife(param1))
-				{
-					remove_knife(param1);
-					FPVMI_AddViewModelToClient(param1, "weapon_knife", iKabar);
-					GivePlayerItem(param1, "weapon_knife");
-				}
-				new String:item2[16];
-				IntToString(KnifeSelection[param1], item2, sizeof(item2));
-				SetClientCookie(param1, g_hMySelection, item2);
-			}
-			else if (StrEqual(item, "reaper"))
-			{
-				KnifeSelection[param1] = 4;
-				if (IsPlayerAlive(param1) && HasKnife(param1))
-				{
-					remove_knife(param1);
-					FPVMI_AddViewModelToClient(param1, "weapon_knife", iBlackDagger);
-					GivePlayerItem(param1, "weapon_knife");
-				}
-				new String:item2[16];
-				IntToString(KnifeSelection[param1], item2, sizeof(item2));
-				SetClientCookie(param1, g_hMySelection, item2);
-			}
-			else if (StrEqual(item, "css"))
-			{
-				KnifeSelection[param1] = 5;
-				if (IsPlayerAlive(param1) && HasKnife(param1))
-				{
-					remove_knife(param1);
-					FPVMI_AddViewModelToClient(param1, "weapon_knife", iOldKnife);
-					GivePlayerItem(param1, "weapon_knife");
-				}
-				new String:item2[16];
-				IntToString(KnifeSelection[param1], item2, sizeof(item2));
-				SetClientCookie(param1, g_hMySelection, item2);
-			}
-			else if (StrEqual(item, "ultimate"))
-			{
-				KnifeSelection[param1] = 6;
-				if (IsPlayerAlive(param1) && HasKnife(param1))
-				{
-					remove_knife(param1);
-					FPVMI_AddViewModelToClient(param1, "weapon_knife", iUltimateKnife);
-					GivePlayerItem(param1, "weapon_knife");
-				}
-				new String:item2[16];
-				IntToString(KnifeSelection[param1], item2, sizeof(item2));
-				SetClientCookie(param1, g_hMySelection, item2);
-			}
+			
+			SetKnife(param1, item);
+			
 		}
-
 		case MenuAction_End:
 		{
 			//param1 is MenuEnd reason, if canceled param2 is MenuCancel reason
@@ -257,22 +169,113 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 	}
 }
 
-public OnClientCookiesCached(client)
+void SetKnife(int param1, char[] item)
 {
-	decl String:sCookieValue[11];
+	char item2[16];
+	if (StrEqual(item, "default"))
+	{
+		if (IsPlayerAlive(param1) && HasKnife(param1))
+		{
+					remove_knife(param1);
+					FPVMI_RemoveViewModelToClient(param1, "weapon_knife");
+					GivePlayerItem(param1, "weapon_knife");
+		}
+		KnifeSelection[param1] = 0;
+		IntToString(KnifeSelection[param1], item2, sizeof(item2));
+		SetClientCookie(param1, g_hMySelection, item2);
+	}
+	else if (StrEqual(item, "tridagger"))
+	{
+		KnifeSelection[param1] = 1;
+		if (IsPlayerAlive(param1) && HasKnife(param1))
+		{
+			remove_knife(param1);
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerModel);
+			GivePlayerItem(param1, "weapon_knife");
+		}
+		IntToString(KnifeSelection[param1], item2, sizeof(item2));
+		SetClientCookie(param1, g_hMySelection, item2);
+	}
+	else if (StrEqual(item, "tridagger_steel"))
+	{
+		KnifeSelection[param1] = 2;
+		if (IsPlayerAlive(param1) && HasKnife(param1))
+		{
+			remove_knife(param1);
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerSteelModel);
+			GivePlayerItem(param1, "weapon_knife");
+		}
+		IntToString(KnifeSelection[param1], item2, sizeof(item2));
+		SetClientCookie(param1, g_hMySelection, item2);
+	}
+	else if (StrEqual(item, "kabar"))
+	{
+		KnifeSelection[param1] = 3;
+		if (IsPlayerAlive(param1) && HasKnife(param1))
+		{
+			remove_knife(param1);
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iKabar);
+			GivePlayerItem(param1, "weapon_knife");
+		}
+		IntToString(KnifeSelection[param1], item2, sizeof(item2));
+		SetClientCookie(param1, g_hMySelection, item2);
+	}
+	else if (StrEqual(item, "reaper"))
+	{
+		KnifeSelection[param1] = 4;
+		if (IsPlayerAlive(param1) && HasKnife(param1))
+		{
+			remove_knife(param1);
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iBlackDagger);
+			GivePlayerItem(param1, "weapon_knife");
+		}
+		IntToString(KnifeSelection[param1], item2, sizeof(item2));
+		SetClientCookie(param1, g_hMySelection, item2);
+	}
+	else if (StrEqual(item, "css"))
+	{
+		KnifeSelection[param1] = 5;
+		if (IsPlayerAlive(param1) && HasKnife(param1))
+		{
+			remove_knife(param1);
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iOldKnife);
+			GivePlayerItem(param1, "weapon_knife");
+		}
+		IntToString(KnifeSelection[param1], item2, sizeof(item2));
+		SetClientCookie(param1, g_hMySelection, item2);
+	}
+	else if (StrEqual(item, "ultimate"))
+	{
+		KnifeSelection[param1] = 6;
+		if (IsPlayerAlive(param1) && HasKnife(param1))
+		{
+			remove_knife(param1);
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iUltimateKnife);
+			GivePlayerItem(param1, "weapon_knife");
+		}
+		IntToString(KnifeSelection[param1], item2, sizeof(item2));
+		SetClientCookie(param1, g_hMySelection, item2);
+	}
+}
+
+
+
+public void OnClientCookiesCached(int client)
+{
+	char sCookieValue[11];
 	GetClientCookie(client, g_hMySelection, sCookieValue, sizeof(sCookieValue));
 	KnifeSelection[client] = StringToInt(sCookieValue);
-	decl String:sCookieValue2[11];
+	char sCookieValue2[11];
 	GetClientCookie(client, g_hMyFirstJoin, sCookieValue2, sizeof(sCookieValue2));
 	showMenu[client] = StringToInt(sCookieValue2);
 }
 
-public OnClientPostAdminCheck(client)
+public void OnClientPostAdminCheck(int client)
 {
-	if(AreClientCookiesCached(client)) SetKnife(client);
+	if(AreClientCookiesCached(client)) SetKnife_saved(client);
 }
 
-SetKnife(param1)
+void SetKnife_saved(int param1)
 {
 	switch (KnifeSelection[param1])
 	{
@@ -307,11 +310,11 @@ SetKnife(param1)
 	}
 }
 
-public Action:remove_knife(client)
+public Action remove_knife(int client)
 {
-	for (new i = 0; i <16; i++)
+	for (int i = 0; i <16; i++)
 	{
-		new weapon = GetPlayerWeaponSlot(client, i);
+		int weapon = GetPlayerWeaponSlot(client, i);
 		if(weapon == -1)
 		{
 			continue;
@@ -325,7 +328,7 @@ public Action:remove_knife(client)
 
 public Action Event_Spawn(Event gEventHook, const char[] gEventName, bool iDontBroadcast)
 {
-	new iClient = GetClientOfUserId(GetEventInt(gEventHook, "userid"));
+	int iClient = GetClientOfUserId(GetEventInt(gEventHook, "userid"));
 	
 	CPrintToChat(iClient, "[{GREEN}Custom Knives{DEFAULT}] This server has custom knives! Type in {LIGHTBLUE}!ck{DEFAULT} or {LIGHTBLUE}!customknife{DEFAULT} to select your knife!");
 	
@@ -344,10 +347,10 @@ bool HasKnife(int client)
 {
 	if (IsValidClient(client))
 	{
-		new weapon = GetPlayerWeaponSlot(client, CS_SLOT_KNIFE);
+		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_KNIFE);
 		if (IsValidEntity(weapon))
 		{
-		    decl String:weapon_name[32];
+		    char weapon_name[32];
 		    GetEntityClassname(weapon, weapon_name, 32);
 		    if (StrContains(weapon_name, "knife", false))
 		    {
@@ -358,7 +361,7 @@ bool HasKnife(int client)
 	return false;
 }
 
-stock bool:IsValidClient(client, bool:nobots = true)
+stock bool IsValidClient(int client, bool nobots = true)
 { 
     if (client <= 0 || client > MaxClients || !IsClientConnected(client) || (nobots && IsFakeClient(client)))
     {
@@ -367,9 +370,9 @@ stock bool:IsValidClient(client, bool:nobots = true)
     return IsClientInGame(client); 
 }
 
-stock bool:Entity_ClassNameMatches(entity, const String:className[], partialMatch=false)
+stock bool Entity_ClassNameMatches(int entity, char[] className, bool partialMatch=false)
 {
-	decl String:entity_className[64];
+	char entity_className[64];
 	Entity_GetClassName(entity, entity_className, sizeof(entity_className));
 
 	if (partialMatch) {
@@ -379,7 +382,7 @@ stock bool:Entity_ClassNameMatches(entity, const String:className[], partialMatc
 	return StrEqual(entity_className, className);
 }
 
-stock Entity_GetClassName(entity, String:buffer[], size)
+stock int Entity_GetClassName(int entity, char[] buffer, int size)
 {
 	return GetEntPropString(entity, Prop_Data, "m_iClassname", buffer, size);	
 }
