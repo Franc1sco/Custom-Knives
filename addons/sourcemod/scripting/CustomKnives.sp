@@ -1,13 +1,12 @@
 #include <sourcemod>
 #include <sdktools>
-#include <weapons>
 #include <sdkhooks>
-#include <csgo_colors>
+#include <multicolors>
 #include <clientprefs>
 #include <cstrike>
+#include <fpvm_interface>
 
-int iTridaggerModel,iTridaggerSteelModel,iBlackDagger,iKabar,iDefaultKnifeT,iDefaultKnifeCT,iOldKnife,iUltimateKnife;
-int PlayerModelIndex[MAXPLAYERS+1];
+int iTridaggerModel,iTridaggerSteelModel,iBlackDagger,iKabar,iOldKnife,iUltimateKnife;
 int KnifeSelection[MAXPLAYERS+1];
 new Handle:g_hMySelection;
 new Handle:g_hMyFirstJoin;
@@ -16,9 +15,9 @@ int showMenu[MAXPLAYERS+1] = 1;
 public Plugin:myinfo =
 {
 	name = "Custom Knife Models",
-	author = "Mr.Derp",
+	author = "Mr.Derp & Franc1sco franug",
 	description = "Custom Knife Models",
-	version = "1.5",
+	version = "2.0",
 	url = "http://steamcommunity.com/id/iLoveAnime69"
 }
 
@@ -49,8 +48,7 @@ public OnMapStart()
 	iKabar = PrecacheModel("models/weapons/v_knife_kabar_v2.mdl");
 	iOldKnife = PrecacheModel("models/weapons/crashz.mdl");
 	iUltimateKnife = PrecacheModel("models/weapons/v_knife_ultimate.mdl");
-	iDefaultKnifeT = PrecacheModel("models/weapons/v_knife_default_t.mdl");
-	iDefaultKnifeCT = PrecacheModel("models/weapons/v_knife_default_t.mdl");
+
 	//Tridagger
 	AddFileToDownloadsTable("models/weapons/v_knife_tridagger_v2.dx90.vtx");
 	AddFileToDownloadsTable("models/weapons/v_knife_tridagger_v2.mdl");
@@ -114,14 +112,6 @@ public OnMapStart()
 	AddFileToDownloadsTable("models/weapons/v_knife_ultimate.vvd");
 }
 
-public OnClientPutInServer(client)
-{
-	if (KnifeSelection[client] != 0)
-	{
-		SDKHook(client, SDKHook_WeaponSwitchPost, WeaponDeployPost);
-	}
-}
-
 public Action:Cmd_sm_customknife(client, args)
 {
 	if (client == 0)
@@ -162,19 +152,10 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 
 			if (StrEqual(item, "default"))
 			{
-				SDKUnhook(param1, SDKHook_WeaponSwitchPost, WeaponDeployPost);
 				if (IsPlayerAlive(param1) && HasKnife(param1))
 				{
 					remove_knife(param1);
-					if (GetClientTeam(param1) == 2)
-					{
-						SetEntProp(PlayerModelIndex[param1], Prop_Send, "m_nModelIndex", iDefaultKnifeT);
-					} else if (GetClientTeam(param1) == 2)
-					{
-						SetEntProp(PlayerModelIndex[param1], Prop_Send, "m_nModelIndex", iDefaultKnifeCT);
-					}
-					GivePlayerItem(param1, "weapon_decoy");
-					remove_decoy(param1);
+					FPVMI_RemoveViewModelToClient(param1, "weapon_knife");
 					GivePlayerItem(param1, "weapon_knife");
 				}
 				KnifeSelection[param1] = 0;
@@ -188,7 +169,7 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 				if (IsPlayerAlive(param1) && HasKnife(param1))
 				{
 					remove_knife(param1);
-					SDKHook(param1, SDKHook_WeaponSwitchPost, WeaponDeployPost);
+					FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerModel);
 					GivePlayerItem(param1, "weapon_knife");
 				}
 				new String:item2[16];
@@ -201,7 +182,7 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 				if (IsPlayerAlive(param1) && HasKnife(param1))
 				{
 					remove_knife(param1);
-					SDKHook(param1, SDKHook_WeaponSwitchPost, WeaponDeployPost);
+					FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerSteelModel);
 					GivePlayerItem(param1, "weapon_knife");
 				}
 				new String:item2[16];
@@ -214,7 +195,7 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 				if (IsPlayerAlive(param1) && HasKnife(param1))
 				{
 					remove_knife(param1);
-					SDKHook(param1, SDKHook_WeaponSwitchPost, WeaponDeployPost);
+					FPVMI_AddViewModelToClient(param1, "weapon_knife", iKabar);
 					GivePlayerItem(param1, "weapon_knife");
 				}
 				new String:item2[16];
@@ -227,7 +208,7 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 				if (IsPlayerAlive(param1) && HasKnife(param1))
 				{
 					remove_knife(param1);
-					SDKHook(param1, SDKHook_WeaponSwitchPost, WeaponDeployPost);
+					FPVMI_AddViewModelToClient(param1, "weapon_knife", iBlackDagger);
 					GivePlayerItem(param1, "weapon_knife");
 				}
 				new String:item2[16];
@@ -240,7 +221,7 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 				if (IsPlayerAlive(param1) && HasKnife(param1))
 				{
 					remove_knife(param1);
-					SDKHook(param1, SDKHook_WeaponSwitchPost, WeaponDeployPost);
+					FPVMI_AddViewModelToClient(param1, "weapon_knife", iOldKnife);
 					GivePlayerItem(param1, "weapon_knife");
 				}
 				new String:item2[16];
@@ -253,7 +234,7 @@ public mh_KnifeHandler(Handle:menu, MenuAction:action, param1, param2)
 				if (IsPlayerAlive(param1) && HasKnife(param1))
 				{
 					remove_knife(param1);
-					SDKHook(param1, SDKHook_WeaponSwitchPost, WeaponDeployPost);
+					FPVMI_AddViewModelToClient(param1, "weapon_knife", iUltimateKnife);
 					GivePlayerItem(param1, "weapon_knife");
 				}
 				new String:item2[16];
@@ -282,18 +263,42 @@ public OnClientCookiesCached(client)
 	showMenu[client] = StringToInt(sCookieValue2);
 }
 
-public Action:remove_decoy(client)
+public OnClientPostAdminCheck(client)
 {
-	for (new i = 0; i <16; i++)
+	if(AreClientCookiesCached(client)) SetKnife(client);
+}
+
+SetKnife(param1)
+{
+	switch (KnifeSelection[param1])
 	{
-		new weapon = GetPlayerWeaponSlot(client, i);
-		if(weapon == -1)
+		case 1:
 		{
-			continue;
-		} else if (Entity_ClassNameMatches(weapon, "weapon_decoy", true))
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerModel);
+		}
+		case 2:
 		{
-			RemovePlayerItem(client, weapon);
-			RemoveEdict(weapon);
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerSteelModel);
+		}
+		case 3:
+		{
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iKabar);
+		}
+		case 4:
+		{
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iBlackDagger);
+		}
+		case 5:
+		{
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iOldKnife);
+		}
+		case 6:
+		{
+			FPVMI_AddViewModelToClient(param1, "weapon_knife", iUltimateKnife);	
+		}
+		default:
+		{
+					// Blah
 		}
 	}
 }
@@ -309,60 +314,7 @@ public Action:remove_knife(client)
 		} else if (Entity_ClassNameMatches(weapon, "weapon_knife", true) || Entity_ClassNameMatches(weapon, "weapon_bayonet", false))
 		{
 			RemovePlayerItem(client, weapon);
-			RemoveEdict(weapon);
-		}
-	}
-}
-
-public void WeaponDeployPost(int iClient, int iWeapon) 
-{
-	// Get weapon name
-	char iWeaponClass[64];
-	GetEntityClassname(iWeapon, iWeaponClass, sizeof(iWeaponClass));
-	
-	if (StrEqual(iWeaponClass, "weapon_knife"))
-	{
-		// Removing any skins (Bug fix)
-		SetEntProp(iWeapon, Prop_Send, "m_iItemIDLow", 0);
-		SetEntProp(iWeapon, Prop_Send, "m_iItemIDHigh", 0);
-		
-		// Set view model for weapon
-		SetEntProp(iWeapon, Prop_Send, "m_nModelIndex", 0);
-		
-		// Set view model for player
-		if(StrEqual(iWeaponClass, "weapon_knife"))
-		{
-			switch (KnifeSelection[iClient])
-			{
-				case 1:
-				{
-					SetEntProp(PlayerModelIndex[iClient], Prop_Send, "m_nModelIndex", iTridaggerModel);
-				}
-				case 2:
-				{
-					SetEntProp(PlayerModelIndex[iClient], Prop_Send, "m_nModelIndex", iTridaggerSteelModel);
-				}
-				case 3:
-				{
-					SetEntProp(PlayerModelIndex[iClient], Prop_Send, "m_nModelIndex", iKabar);
-				}
-				case 4:
-				{
-					SetEntProp(PlayerModelIndex[iClient], Prop_Send, "m_nModelIndex", iBlackDagger);
-				}
-				case 5:
-				{
-					SetEntProp(PlayerModelIndex[iClient], Prop_Send, "m_nModelIndex", iOldKnife);
-				}
-				case 6:
-				{
-					SetEntProp(PlayerModelIndex[iClient], Prop_Send, "m_nModelIndex", iUltimateKnife);	
-				}
-				default:
-				{
-					// Blah
-				}
-			}
+			AcceptEntityInput(weapon, "Kill");
 		}
 	}
 }
@@ -370,9 +322,8 @@ public void WeaponDeployPost(int iClient, int iWeapon)
 public Action Event_Spawn(Event gEventHook, const char[] gEventName, bool iDontBroadcast)
 {
 	new iClient = GetClientOfUserId(GetEventInt(gEventHook, "userid"));
-	PlayerModelIndex[iClient] = Weapon_GetViewModelIndex(iClient);
 	
-	CGOPrintToChat(iClient, "[{GREEN}Custom Knives{DEFAULT}] This server has custom knives! Type in {LIGHTBLUE}!ck{DEFAULT} or {LIGHTBLUE}!customknife{DEFAULT} to select your knife!");
+	CPrintToChat(iClient, "[{GREEN}Custom Knives{DEFAULT}] This server has custom knives! Type in {LIGHTBLUE}!ck{DEFAULT} or {LIGHTBLUE}!customknife{DEFAULT} to select your knife!");
 	
 	if (AreClientCookiesCached(iClient))
 	{
@@ -412,29 +363,19 @@ stock bool:IsValidClient(client, bool:nobots = true)
     return IsClientInGame(client); 
 }
 
-// Get model index and prevent server from crash
-int Weapon_GetViewModelIndex(int iClient)
+stock bool:Entity_ClassNameMatches(entity, const String:className[], partialMatch=false)
 {
-	int iIndex = -1;
-	
-	// Find entity and return index
-	while ((iIndex = FindEntityByClassname2(iIndex, "predicted_viewmodel")) != -1)
-	{
-		int iOwner = GetEntPropEnt(iIndex, Prop_Data, "m_hOwner");
+	decl String:entity_className[64];
+	Entity_GetClassName(entity, entity_className, sizeof(entity_className));
 
-		if (iOwner != iClient)
-			continue;
-
-		return iIndex;
+	if (partialMatch) {
+		return (StrContains(entity_className, className) != -1);
 	}
-	return -1;
+
+	return StrEqual(entity_className, className);
 }
 
-// Get entity name
-int FindEntityByClassname2(int iStartEnt, char[] sClassname)
+stock Entity_GetClassName(entity, String:buffer[], size)
 {
-	while (iStartEnt > -1 && !IsValidEntity(iStartEnt)) 
-		iStartEnt--;
-	
-	return FindEntityByClassname(iStartEnt, sClassname);
+	return GetEntPropString(entity, Prop_Data, "m_iClassname", buffer, size);	
 }
