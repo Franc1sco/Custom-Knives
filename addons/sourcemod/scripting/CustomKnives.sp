@@ -382,7 +382,7 @@ stock bool Entity_ClassNameMatches(int entity, char[] className, bool partialMat
 	return StrEqual(entity_className, className);
 }
 
-stock int Entity_GetClassName(int entity, char[] buffer, int size)
+stock void Entity_GetClassName(int entity, char[] buffer, int size)
 {
-	return GetEntPropString(entity, Prop_Data, "m_iClassname", buffer, size);	
+	GetEntPropString(entity, Prop_Data, "m_iClassname", buffer, size);	
 }
