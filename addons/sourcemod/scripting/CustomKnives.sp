@@ -14,7 +14,7 @@ Handle g_hMySelection;
 Handle g_hMyFirstJoin;
 int showMenu[MAXPLAYERS+1] = 1;
 
-#define DATA "2.0"
+#define DATA "2.1"
 
 public Plugin myinfo =
 {
@@ -174,12 +174,7 @@ void SetKnife(int param1, char[] item)
 	char item2[16];
 	if (StrEqual(item, "default"))
 	{
-		if (IsPlayerAlive(param1) && HasKnife(param1))
-		{
-					remove_knife(param1);
-					FPVMI_RemoveViewModelToClient(param1, "weapon_knife");
-					GivePlayerItem(param1, "weapon_knife");
-		}
+		FPVMI_RemoveViewModelToClient(param1, "weapon_knife");
 		KnifeSelection[param1] = 0;
 		IntToString(KnifeSelection[param1], item2, sizeof(item2));
 		SetClientCookie(param1, g_hMySelection, item2);
@@ -187,72 +182,42 @@ void SetKnife(int param1, char[] item)
 	else if (StrEqual(item, "tridagger"))
 	{
 		KnifeSelection[param1] = 1;
-		if (IsPlayerAlive(param1) && HasKnife(param1))
-		{
-			remove_knife(param1);
-			FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerModel);
-			GivePlayerItem(param1, "weapon_knife");
-		}
+		FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerModel);
 		IntToString(KnifeSelection[param1], item2, sizeof(item2));
 		SetClientCookie(param1, g_hMySelection, item2);
 	}
 	else if (StrEqual(item, "tridagger_steel"))
 	{
 		KnifeSelection[param1] = 2;
-		if (IsPlayerAlive(param1) && HasKnife(param1))
-		{
-			remove_knife(param1);
-			FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerSteelModel);
-			GivePlayerItem(param1, "weapon_knife");
-		}
+		FPVMI_AddViewModelToClient(param1, "weapon_knife", iTridaggerSteelModel);
 		IntToString(KnifeSelection[param1], item2, sizeof(item2));
 		SetClientCookie(param1, g_hMySelection, item2);
 	}
 	else if (StrEqual(item, "kabar"))
 	{
 		KnifeSelection[param1] = 3;
-		if (IsPlayerAlive(param1) && HasKnife(param1))
-		{
-			remove_knife(param1);
-			FPVMI_AddViewModelToClient(param1, "weapon_knife", iKabar);
-			GivePlayerItem(param1, "weapon_knife");
-		}
+		FPVMI_AddViewModelToClient(param1, "weapon_knife", iKabar);
 		IntToString(KnifeSelection[param1], item2, sizeof(item2));
 		SetClientCookie(param1, g_hMySelection, item2);
 	}
 	else if (StrEqual(item, "reaper"))
 	{
 		KnifeSelection[param1] = 4;
-		if (IsPlayerAlive(param1) && HasKnife(param1))
-		{
-			remove_knife(param1);
-			FPVMI_AddViewModelToClient(param1, "weapon_knife", iBlackDagger);
-			GivePlayerItem(param1, "weapon_knife");
-		}
+		FPVMI_AddViewModelToClient(param1, "weapon_knife", iBlackDagger);
 		IntToString(KnifeSelection[param1], item2, sizeof(item2));
 		SetClientCookie(param1, g_hMySelection, item2);
 	}
 	else if (StrEqual(item, "css"))
 	{
 		KnifeSelection[param1] = 5;
-		if (IsPlayerAlive(param1) && HasKnife(param1))
-		{
-			remove_knife(param1);
-			FPVMI_AddViewModelToClient(param1, "weapon_knife", iOldKnife);
-			GivePlayerItem(param1, "weapon_knife");
-		}
+		FPVMI_AddViewModelToClient(param1, "weapon_knife", iOldKnife);
 		IntToString(KnifeSelection[param1], item2, sizeof(item2));
 		SetClientCookie(param1, g_hMySelection, item2);
 	}
 	else if (StrEqual(item, "ultimate"))
 	{
 		KnifeSelection[param1] = 6;
-		if (IsPlayerAlive(param1) && HasKnife(param1))
-		{
-			remove_knife(param1);
-			FPVMI_AddViewModelToClient(param1, "weapon_knife", iUltimateKnife);
-			GivePlayerItem(param1, "weapon_knife");
-		}
+		FPVMI_AddViewModelToClient(param1, "weapon_knife", iUltimateKnife);
 		IntToString(KnifeSelection[param1], item2, sizeof(item2));
 		SetClientCookie(param1, g_hMySelection, item2);
 	}
@@ -310,22 +275,6 @@ void SetKnife_saved(int param1)
 	}
 }
 
-public Action remove_knife(int client)
-{
-	for (int i = 0; i <16; i++)
-	{
-		int weapon = GetPlayerWeaponSlot(client, i);
-		if(weapon == -1)
-		{
-			continue;
-		} else if (Entity_ClassNameMatches(weapon, "weapon_knife", true) || Entity_ClassNameMatches(weapon, "weapon_bayonet", false))
-		{
-			RemovePlayerItem(client, weapon);
-			AcceptEntityInput(weapon, "Kill");
-		}
-	}
-}
-
 public Action Event_Spawn(Event gEventHook, const char[] gEventName, bool iDontBroadcast)
 {
 	int iClient = GetClientOfUserId(GetEventInt(gEventHook, "userid"));
@@ -343,24 +292,6 @@ public Action Event_Spawn(Event gEventHook, const char[] gEventName, bool iDontB
 	}
 }
 
-bool HasKnife(int client)
-{
-	if (IsValidClient(client))
-	{
-		int weapon = GetPlayerWeaponSlot(client, CS_SLOT_KNIFE);
-		if (IsValidEntity(weapon))
-		{
-		    char weapon_name[32];
-		    GetEntityClassname(weapon, weapon_name, 32);
-		    if (StrContains(weapon_name, "knife", false))
-		    {
-		        return true;
-		    }
-		}
-	}
-	return false;
-}
-
 stock bool IsValidClient(int client, bool nobots = true)
 { 
     if (client <= 0 || client > MaxClients || !IsClientConnected(client) || (nobots && IsFakeClient(client)))
@@ -368,21 +299,4 @@ stock bool IsValidClient(int client, bool nobots = true)
         return false; 
     }
     return IsClientInGame(client); 
-}
-
-stock bool Entity_ClassNameMatches(int entity, char[] className, bool partialMatch=false)
-{
-	char entity_className[64];
-	Entity_GetClassName(entity, entity_className, sizeof(entity_className));
-
-	if (partialMatch) {
-		return (StrContains(entity_className, className) != -1);
-	}
-
-	return StrEqual(entity_className, className);
-}
-
-stock void Entity_GetClassName(int entity, char[] buffer, int size)
-{
-	GetEntPropString(entity, Prop_Data, "m_iClassname", buffer, size);	
 }
