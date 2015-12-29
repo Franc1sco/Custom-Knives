@@ -36,7 +36,7 @@ public void OnPluginStart()
 	
 	cvar_time = CreateConVar("sm_customknifemodels_time", "20");
 	cvar_times = CreateConVar("sm_customknifemodels_times", "5");
-	g_veces = GetConVarBool(cvar_times);
+	g_veces = GetConVarInt(cvar_times);
 	g_time = GetConVarInt(cvar_time);
 	HookConVarChange(cvar_time, OnConVarChanged);
 	HookConVarChange(cvar_times, OnConVarChanged);
