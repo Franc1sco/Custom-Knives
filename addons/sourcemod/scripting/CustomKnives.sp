@@ -168,7 +168,7 @@ void ShowKnifeMenu(int client)
 	AddMenuItem(menu_knives, "reaper", "Reaper Dagger");
 	AddMenuItem(menu_knives, "css", "1.6/CSS Knife");
 	AddMenuItem(menu_knives, "ultimate", "Bear Grylls Knife");
-
+	SetMenuPagination(menu_knives, MENU_NO_PAGINATION);
 	DisplayMenu(menu_knives, client, 0);
 }
 
