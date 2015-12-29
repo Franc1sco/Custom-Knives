@@ -197,7 +197,7 @@ public int mh_KnifeHandler(Menu menu, MenuAction action, int param1, int param2)
 					times = 0;
 				}
 				
-				if(g_veces >= times)
+				if(times >= g_veces)
 				{
 					CPrintToChat(param1, "[{GREEN}Custom Knives{DEFAULT}] You can use this plugin only %i times in this map!", g_veces);
 					return;
