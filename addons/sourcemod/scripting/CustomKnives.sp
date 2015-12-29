@@ -14,7 +14,9 @@ Handle g_hMySelection;
 Handle g_hMyFirstJoin;
 int showMenu[MAXPLAYERS+1] = 1;
 
-#define DATA "2.1"
+#define DATA "2.2"
+
+Handle cvar_time, timers;
 
 public Plugin myinfo =
 {
@@ -29,7 +31,10 @@ public void OnPluginStart()
 {
 	CreateConVar("sm_customknifemodels_version", DATA, "plugin info", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
+	cvar_time = CreateConVar("sm_customknifemodels_time", "20");
+	
 	HookEvent("player_spawn", Event_Spawn, EventHookMode_Post);
+	HookEvent("round_start", Event_Start);
 	RegConsoleCmd("sm_customknife", Cmd_sm_customknife, "Knife Menu");
 	RegConsoleCmd("sm_ck", Cmd_sm_customknife, "Knife Menu");
 	g_hMySelection = RegClientCookie("ck_selection", "Knife Selection", CookieAccess_Protected);
@@ -152,7 +157,11 @@ public int mh_KnifeHandler(Menu menu, MenuAction action, int param1, int param2)
 		case MenuAction_Select:
 		{
 			//param1 is client, param2 is item
-
+			if(timers == INVALID_HANDLE && GetUserAdmin(param1) != INVALID_ADMIN_ID)
+			{
+				CPrintToChat(param1, "[{GREEN}Custom Knives{DEFAULT}] You can use this plugin only the first %i seconds of the round!", GetConVarInt(cvar_time));
+				return;
+			}
 			char item[64];
 			GetMenuItem(menu, param2, item, sizeof(item));
 			
@@ -273,6 +282,18 @@ void SetKnife_saved(int param1)
 					// Blah
 		}
 	}
+}
+
+public Action Event_Start(Event gEventHook, const char[] gEventName, bool iDontBroadcast)
+{
+	if(timers != INVALID_HANDLE) KillTimer(timers);
+	timers = CreateTimer(GetConVarInt(cvar_time) * 1.0, Passed);
+	
+}
+
+public Action Passed(Handle timer)
+{
+	timers = INVALID_HANDLE;
 }
 
 public Action Event_Spawn(Event gEventHook, const char[] gEventName, bool iDontBroadcast)
