@@ -291,6 +291,8 @@ public void OnClientCookiesCached(int client)
 
 public void OnClientPostAdminCheck(int client)
 {
+	CPrintToChat(client, "[{GREEN}Custom Knives{DEFAULT}] This server has custom knives! Type in {LIGHTBLUE}!ck{DEFAULT} or {LIGHTBLUE}!customknife{DEFAULT} to select your knife!");
+	
 	if(AreClientCookiesCached(client)) SetKnife_saved(client);
 }
 
@@ -344,8 +346,6 @@ public Action Passed(Handle timer)
 public Action Event_Spawn(Event gEventHook, const char[] gEventName, bool iDontBroadcast)
 {
 	int iClient = GetClientOfUserId(GetEventInt(gEventHook, "userid"));
-	
-	CPrintToChat(iClient, "[{GREEN}Custom Knives{DEFAULT}] This server has custom knives! Type in {LIGHTBLUE}!ck{DEFAULT} or {LIGHTBLUE}!customknife{DEFAULT} to select your knife!");
 	
 	if (AreClientCookiesCached(iClient))
 	{
