@@ -168,7 +168,8 @@ void ShowKnifeMenu(int client)
 	AddMenuItem(menu_knives, "reaper", "Reaper Dagger");
 	AddMenuItem(menu_knives, "css", "1.6/CSS Knife");
 	AddMenuItem(menu_knives, "ultimate", "Bear Grylls Knife");
-
+	SetMenuPagination(menu_knives, MENU_NO_PAGINATION);
+	SetMenuExitButton(menu_knives, true);
 	DisplayMenu(menu_knives, client, 0);
 }
 
@@ -291,8 +292,6 @@ public void OnClientCookiesCached(int client)
 
 public void OnClientPostAdminCheck(int client)
 {
-	CPrintToChat(client, "[{GREEN}Custom Knives{DEFAULT}] This server has custom knives! Type in {LIGHTBLUE}!ck{DEFAULT} or {LIGHTBLUE}!customknife{DEFAULT} to select your knife!");
-	
 	if(AreClientCookiesCached(client)) SetKnife_saved(client);
 }
 
