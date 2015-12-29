@@ -16,7 +16,8 @@ int showMenu[MAXPLAYERS+1] = 1;
 
 #define DATA "2.2"
 
-Handle cvar_time, timers;
+Handle cvar_time, timers, trie_times, cvar_times;
+int g_veces, g_time;
 
 public Plugin myinfo =
 {
@@ -29,9 +30,16 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	trie_times = CreateTrie();
+	
 	CreateConVar("sm_customknifemodels_version", DATA, "plugin info", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
 	cvar_time = CreateConVar("sm_customknifemodels_time", "20");
+	cvar_times = CreateConVar("sm_customknifemodels_times", "5");
+	g_veces = GetConVarBool(cvar_times);
+	g_time = GetConVarInt(cvar_time);
+	HookConVarChange(cvar_time, OnConVarChanged);
+	HookConVarChange(cvar_times, OnConVarChanged);
 	
 	HookEvent("player_spawn", Event_Spawn, EventHookMode_Post);
 	HookEvent("round_start", Event_Start);
@@ -51,8 +59,22 @@ public void OnPluginStart()
     }
 }
 
+public void OnConVarChanged(Handle convar, const char[] oldValue, const char[] newValue)
+{
+	if (convar == cvar_time)
+	{
+		g_time = StringToInt(newValue);
+	}
+	else if (convar == cvar_times)
+	{
+		g_veces = StringToInt(newValue);
+	}
+}
+
 public void OnMapStart()
 {
+	ClearTrie(trie_times);
+	
 	iTridaggerModel = PrecacheModel("models/weapons/v_knife_tridagger_v2.mdl");
 	iTridaggerSteelModel = PrecacheModel("models/weapons/v_knife_tridagger_steel.mdl");
 	iBlackDagger = PrecacheModel("models/weapons/v_knife_reaper.mdl");
@@ -136,7 +158,7 @@ public Action Cmd_sm_customknife(int client, int args)
 
 void ShowKnifeMenu(int client)
 {
-	Menu menu_knives = new Menu(mh_KnifeHandler, MENU_ACTIONS_DEFAULT);
+	Menu menu_knives = new Menu(mh_KnifeHandler);
 	SetMenuTitle(menu_knives, "Select Knife");
 
 	AddMenuItem(menu_knives, "default", "Default Knife");
@@ -157,11 +179,34 @@ public int mh_KnifeHandler(Menu menu, MenuAction action, int param1, int param2)
 		case MenuAction_Select:
 		{
 			//param1 is client, param2 is item
-			if(timers == INVALID_HANDLE && GetUserAdmin(param1) != INVALID_ADMIN_ID)
+			if(GetUserAdmin(param1) == INVALID_ADMIN_ID)
 			{
-				CPrintToChat(param1, "[{GREEN}Custom Knives{DEFAULT}] You can use this plugin only the first %i seconds of the round!", GetConVarInt(cvar_time));
-				return;
+				if(timers == INVALID_HANDLE)
+				{
+				
+					CPrintToChat(param1, "[{GREEN}Custom Knives{DEFAULT}] You can use this plugin only the first %i seconds of this round!", g_time);
+					return;
+				}
+			
+				char steamid[64];
+				int times;
+				GetClientAuthId(param1, AuthId_Steam2,  steamid, sizeof(steamid));
+			
+				if(!GetTrieValue(trie_times, steamid, times))
+				{
+					times = 0;
+				}
+				
+				if(g_veces >= times)
+				{
+					CPrintToChat(param1, "[{GREEN}Custom Knives{DEFAULT}] You can use this plugin only %i times in this map!", g_veces);
+					return;
+				}
+				++times;
+	
+				SetTrieValue(trie_times, steamid, times);
 			}
+			
 			char item[64];
 			GetMenuItem(menu, param2, item, sizeof(item));
 			
