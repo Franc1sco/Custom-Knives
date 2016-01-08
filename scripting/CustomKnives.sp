@@ -14,7 +14,7 @@ Handle g_hMySelection;
 Handle g_hMyFirstJoin;
 int showMenu[MAXPLAYERS+1] = 1;
 
-#define DATA "2.3"
+#define DATA "2.3.1"
 
 Handle cvar_time, timers, trie_times, cvar_times;
 int g_veces, g_time;
@@ -34,8 +34,8 @@ public void OnPluginStart()
 	
 	CreateConVar("sm_customknifemodels_version", DATA, "plugin info", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	
-	cvar_time = CreateConVar("sm_customknifemodels_time", "20");
-	cvar_times = CreateConVar("sm_customknifemodels_times", "5");
+	cvar_time = CreateConVar("sm_customknifemodels_time", "20", "time in the round start that a normal client can use the !ck command. 0 = disabled.");
+	cvar_times = CreateConVar("sm_customknifemodels_times", "5", "times in the map that a normal client can use the !ck command. 0 = disabled.");
 	g_veces = GetConVarInt(cvar_times);
 	g_time = GetConVarInt(cvar_time);
 	HookConVarChange(cvar_time, OnConVarChanged);
@@ -206,7 +206,7 @@ public int mh_KnifeHandler(Menu menu, MenuAction action, int param1, int param2)
 			//param1 is client, param2 is item
 			if(GetUserAdmin(param1) == INVALID_ADMIN_ID)
 			{
-				if(timers == INVALID_HANDLE)
+				if(g_time > 0 && timers == INVALID_HANDLE)
 				{
 				
 					CPrintToChat(param1, "[{GREEN}Custom Knives{DEFAULT}] You can use this plugin only the first %i seconds of this round!", g_time);
@@ -222,7 +222,7 @@ public int mh_KnifeHandler(Menu menu, MenuAction action, int param1, int param2)
 					times = 0;
 				}
 				
-				if(times >= g_veces)
+				if(g_veces > 0 && times >= g_veces)
 				{
 					CPrintToChat(param1, "[{GREEN}Custom Knives{DEFAULT}] You can use this plugin only %i times in this map!", g_veces);
 					return;
